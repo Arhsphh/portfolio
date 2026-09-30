@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Investigation Portfolio Board</title>
+  
+  <!-- Εισαγωγή των αρχείων για το εφέ Google Maps (Leaflet) -->
+  <link rel="stylesheet" href="https://unpkg.com" />
+  <script src="https://unpkg.com"></script>
+
+  <style>
+    html, body, #map {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      background-color: #121212;
+      /* Μπλοκάρει το κούνημα του browser στα κινητά */
+      touch-action: none; 
+    }
+    
+    /* Στυλ για τις φωτογραφίες-Polaroid πάνω στον πίνακα */
+    .polaroid-frame {
+      background: white;
+      padding: 8px 8px 22px 8px;
+      box-shadow: 3px 5px 15px rgba(0,0,0,0.6);
+      border: 1px solid #ddd;
+      transition: transform 0.2s ease;
+      cursor: pointer;
+    }
+    .polaroid-frame img {
+      width: 150px; /* Μέγεθος φωτογραφίας στον πίνακα */
+      height: auto;
+      display: block;
+    }
+    .polaroid-frame:hover {
+      transform: scale(1.1) rotate(0deg) !important;
+      z-index: 9999 !important;
+    }
+
+    /* Στυλ για το Popup (Φάκελος Υπόθεσης) όταν κάνεις κλικ */
+    .leaflet-popup-content-wrapper {
+      background: #f4edd2; 
+      color: #222;
+      font-family: 'Courier New', Courier, monospace;
+      border-radius: 4px;
+      padding: 10px;
+      box-shadow: 5px 5px 20px rgba(0,0,0,0.7);
+    }
+    .leaflet-popup-content img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 2px;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="map"></div>
+
+  <script>
+    // 1. Δημιουργία του καμβά (Google Maps style) χωρίς γεωγραφικό χάρτη
+    var map = L.map('map', {
+      crs: L.CRS.Simple,
+      minZoom: -1,
+      maxZoom: 2,
+      zoomControl: false,
+      zoomAnimation: true,
+      tap: false // Διορθώνει τα μπερδέματα αφής στα κινητά
+    });
+
+    // Ορίζουμε έναν μεγάλο σταθερό καμβά 1600 (Ύψος) επί 2500 (Πλάτος)
+    var bounds = [[0, 0], [1600, 2500]];
+
+    // 2. Προσθήκη του φόντου (Υφή OSB/Φελλού)
+    var backgroundImage = L.imageOverlay('https://wixstatic.com', bounds).addTo(map);
+    
+    // Εστίαση στο κέντρο του πίνακα κατά την εκκίνηση
+    map.fitBounds(bounds);
+
+    // 3. ΣΥΝΑΡΤΗΣΗ ΓΙΑ ΝΑ ΒΑΖΕΙΣ ΦΩΤΟΓΡΑΦΙΕΣ (Πειστήρια)
+    function addEvidence(y, x, thumbUrl, fullUrl, rotation, description) {
+      var customIcon = L.divIcon({
+        className: 'custom-pixel-node',
+        html: `<div class="polaroid-frame" style="transform: rotate(${rotation}deg);">
+                 <img src="${thumbUrl}">
+               </div>`,
+        iconSize: [170, 200], // Το συνολικό μέγεθος του Polaroid frame σε pixels
+        iconAnchor: [85, 100] // Καρφίτσωμα ακριβώς στο κέντρο της φωτό για τα σκοινιά
+      });
+
+      var popupContent = `
+        <div style="width:280px;">
+          <img src="${fullUrl}" style="width:100%;">
+          <h3 style="margin:10px 0 5px 0; font-weight:bold;">ΠΕΙΣΤΗΡΙΟ</h3>
+          <p style="margin:0; font-size:13px; line-height:1.4;">${description}</p>
+        </div>
+      `;
+
+      // Σταθερότητα οθόνης με autoPan: false
+      L.marker([y, x], {icon: customIcon}).addTo(map).bindPopup(popupContent, {
+        autoPan: false,
+        closeOnClick: false
+      });
+    }
+
+    // 4. ΣΥΝΑΡΤΗΣΗ ΓΙΑ ΤΑ ΚΟΚΚΙΝΑ ΣΚΟΙΝΙΑ
+    function drawString(pointA, pointB) {
+      L.polyline([pointA, pointB], {
+        color: '#cc0000',
+        weight: 3,
+        opacity: 0.85,
+        lineCap: 'round'
+      }).addTo(map);
+    }
+
+    // ==========================================
+    // ΕΔΩ ΒΑΖΕΙΣ ΤΙΣ ΦΩΤΟΓΡΑΦΙΕΣ ΣΟΥ (ΠΑΡΑΔΕΙΓΜΑΤΑ)
+    // ==========================================
+    
+    // Φωτογραφία 1 (Ύψος: 900, Πλάτος: 800, Κλίση: -5 μοίρες)
+    addEvidence(900, 800, 
+                'https://picsum.photos', 
+                'https://picsum.photos', 
+                -5, 
+                'Υπόθεση #01.<br>Τοποθεσία: Αθήνα.<br>ISO 400 | f/2.8');
+
+    // Φωτογραφία 2 (Ύψος: 700, Πλάτος: 1600, Κλίση: 6 μοίρες)
+    addEvidence(700, 1600, 
+                'https://picsum.photos', 
+                'https://picsum.photos', 
+                6, 
+                'Υπόθεση #02.<br>Concept: Street Portrait.<br>ISO 100 | f/1.4');
+
+    // 5. ΣΧΕΔΙΑΣΗ ΣΚΟΙΝΙΟΥ ΑΝΑΜΕΣΑ ΣΤΙΣ ΔΥΟ ΦΩΤΟΓΡΑΦΙΕΣ
+    drawString([900, 800], [700, 1600]);
+
+  </script>
+</body>
+</html>
