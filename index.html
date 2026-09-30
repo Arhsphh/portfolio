@@ -2,207 +2,133 @@
 <html lang="el">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=3.0, user-scalable=yes" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Investigation Portfolio Board</title>
+  
+  <!-- Εισαγωγή των αρχείων για το εφέ Google Maps (Leaflet) -->
+  <link rel="stylesheet" href="https://unpkg.com" />
+  <script src="https://unpkg.com"></script>
+
   <style>
-    html, body {
+    html, body, #map {
       width: 100%;
       height: 100%;
       margin: 0;
       padding: 0;
       background-color: #1a1a1a;
-      overflow: hidden;
-      user-select: none;
-    }
-
-    /* Το πλαίσιο της οθόνης */
-    #viewport {
-      width: 100%;
-      height: 100%;
-      position: relative;
-      cursor: grab;
-    }
-    #viewport:active {
-      cursor: grabbing;
-    }
-
-    /* Ο μεγάλος πίνακας (Καμβάς) - Με εφέ σκούρου ξύλου/φελλου */
-    #board {
-      width: 2400px;
-      height: 1600px;
-      background: radial-gradient(circle, #3a2d28 0%, #1e1512 100%);
-      position: absolute;
-      top: 0;
-      left: 0;
-      transform-origin: 0 0;
-      box-shadow: inset 0 0 100px rgba(0,0,0,0.8);
-    }
-
-    /* Στυλ για τις φωτογραφίες Polaroid */
-    .polaroid {
-      background: white;
-      padding: 10px 10px 25px 10px;
-      box-shadow: 5px 8px 20px rgba(0,0,0,0.6);
-      border: 1px solid #ddd;
-      position: absolute;
-      font-family: 'Courier New', monospace;
-      font-size: 12px;
-      font-weight: bold;
-      color: #333;
-      text-align: center;
-      width: 180px;
     }
     
-    /* Γκρι εσωτερικό κουτί για τις φωτογραφίες */
+    /* Στυλ για τις φωτογραφίες-Polaroid πάνω στον πίνακα */
+    .polaroid-frame {
+      background: white;
+      padding: 8px 8px 22px 8px;
+      box-shadow: 3px 5px 15px rgba(0,0,0,0.6);
+      border: 1px solid #ddd;
+      cursor: pointer;
+      width: 150px;
+      text-align: center;
+      font-family: 'Courier New', monospace;
+      font-size: 11px;
+      color: #333;
+    }
+    
+    /* Γκρι κουτί αντί για εικόνα για να μην σπάει το link */
     .photo-placeholder {
-      width: 180px;
-      height: 130px;
+      width: 150px;
+      height: 110px;
       background-color: #555;
-      margin-bottom: 8px;
+      margin-bottom: 5px;
       display: flex;
       align-items: center;
       justify-content: center;
       color: white;
       font-size: 10px;
     }
-
-    /* Το επίπεδο για τα κόκκινα σκοινιά */
-    svg {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-    }
-
-    /* Κουμπιά ελέγχου Zoom - Σταθερά στην οθόνη */
-    .zoom-controls {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      z-index: 10000;
-    }
-    .zoom-btn {
-      width: 50px;
-      height: 50px;
-      background-color: #ffffff;
-      border: 2px solid #333;
-      border-radius: 50%;
-      font-size: 24px;
-      font-weight: bold;
-      color: #333;
-      cursor: pointer;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .zoom-btn:active {
-      background-color: #ddd;
-    }
   </style>
 </head>
 <body>
 
-  <!-- Κουμπιά Zoom με απευθείας εντολές HTML κλικ -->
-  <div class="zoom-controls">
-    <button class="zoom-btn" id="btn-in">+</button>
-    <button class="zoom-btn" id="btn-out">-</button>
-  </div>
-
-  <div id="viewport">
-    <div id="board">
-      
-      <!-- Κόκκινο Σκοινί -->
-      <svg>
-        <line x1="490" y1="410" x2="1290" y2="610" style="stroke:#cc0000; stroke-width:4; stroke-opacity:0.9; stroke-linecap:round;" />
-      </svg>
-
-      <!-- ΦΩΤΟΓΡΑΦΙΑ 1 -->
-      <div class="polaroid" style="left: 400px; top: 300px; transform: rotate(-5deg);" onclick="alert('ΥΠΟΘΕΣΗ #01\nISO 400 | f/2.8');">
-        <div class="photo-placeholder">ΦΩΤΟΓΡΑΦΙΑ Α</div>
-        <span>ΠΕΙΣΤΗΡΙΟ 01</span>
-      </div>
-
-      <!-- ΦΩΤΟΓΡΑΦΙΑ 2 -->
-      <div class="polaroid" style="left: 1200px; top: 500px; transform: rotate(6deg);" onclick="alert('ΥΠΟΘΕΣΗ #02\nISO 100 | f/1.4');">
-        <div class="photo-placeholder">ΦΩΤΟΓΡΑΦΙΑ Β</div>
-        <span>ΠΕΙΣΤΗΡΙΟ 02</span>
-      </div>
-
-    </div>
-  </div>
+  <div id="map"></div>
 
   <script>
-    var viewport = document.getElementById('viewport');
-    var board = document.getElementById('board');
-    var btnIn = document.getElementById('btn-in');
-    var btnOut = document.getElementById('btn-out');
+    // Μετατροπή κειμένου σε αριθμούς για απόλυτη ασφάλεια δεδομένων
+    var canvasH = parseInt("1600");
+    var canvasW = parseInt("2500");
+    
+    var iconW = parseInt("170");
+    var iconH = parseInt("200");
+    var anchorW = parseInt("85");
+    var anchorH = parseInt("100");
 
-    // Αρχικές τιμές θέσης και μεγέθους
-    var scale = 0.8; 
-    var posX = 100;   
-    var posY = 50;    
-    var isDragging = false;
-    var startX = 0;
-    var startY = 0;
+    // 1. Δημιουργία του καμβά (Google Maps style)
+    var map = L.map('map', {
+      crs: L.CRS.Simple,
+      minZoom: parseInt("-1"),
+      maxZoom: parseInt("1"),
+      zoomControl: true
+    });
 
-    function updateTransform() {
-      board.style.transform = "translate(" + posX + "px, " + posY + "px) scale(" + scale + ")";
+    // ΔΙΟΡΘΩΣΗ: Χρήση L.latLng για να μην σβήνονται οι αριθμοί από το φίλτρο
+    var southWest = L.latLng(parseInt("0"), parseInt("0"));
+    var northEast = L.latLng(canvasH, canvasW);
+    var bounds = L.latLngBounds(southWest, northEast);
+
+    // 2. Δημιουργία του φόντου με ψηφιακό σκούρο καφέ χρώμα
+    var background = L.rectangle(bounds, {
+      color: "#3a2d28",
+      weight: parseInt("1"),
+      fillColor: "#1e1512",
+      fillOpacity: parseInt("1")
+    }).addTo(map);
+    
+    // Εστίαση στον πίνακα κατά την εκκίνηση
+    map.fitBounds(bounds);
+
+    // 3. ΣΥΝΑΡΤΗΣΗ ΓΙΑ ΝΑ ΒΑΖΕΙΣ ΦΩΤΟΓΡΑΦΙΕΣ (Πειστήρια)
+    function addEvidence(y, x, rotation, title, text) {
+      // Δημιουργία μεγεθών με L.point για ασφάλεια
+      var sizePoint = L.point(iconW, iconH);
+      var anchorPoint = L.point(anchorW, anchorH);
+
+      var customIcon = L.divIcon({
+        className: 'custom-pixel-node',
+        html: `<div class="polaroid-frame" style="transform: rotate(${rotation}deg);">
+                 <div class="photo-placeholder">ΦΩΤΟΓΡΑΦΙΑ</div>
+                 <span>${title}</span>
+               </div>`,
+        iconSize: sizePoint,
+        iconAnchor: anchorPoint
+      });
+
+      var markerPos = L.latLng(y, x);
+      L.marker(markerPos, {icon: customIcon}).addTo(map).bindPopup(`
+        <div style="width:200px; font-family:monospace;">
+          <h3>${title}</h3>
+          <p>${text}</p>
+        </div>
+      `);
     }
-    updateTransform();
 
-    // 1. ΛΕΙΤΟΥΡΓΙΑ DRAG (ΣΥΡΣΙΜΟ)
-    viewport.addEventListener('pointerdown', function(e) {
-      if (e.target.closest('.polaroid') || e.target.closest('.zoom-controls')) return; 
-      isDragging = true;
-      startX = e.clientX - posX;
-      startY = e.clientY - posY;
-      viewport.setPointerCapture(e.pointerId);
-    });
+    // ==========================================
+    // ΕΔΩ ΜΠΑΙΝΟΥΝ ΟΙ ΦΩΤΟΓΡΑΦΙΕΣ ΚΑΙ ΤΑ ΣΚΟΙΝΙΑ
+    // ==========================================
+    
+    // Φωτογραφία 1 (Ύψος: 900, Πλάτος: 800)
+    addEvidence(parseInt("900"), parseInt("800"), parseInt("-5"), 'ΠΕΙΣΤΗΡΙΟ 01', 'ISO 400 | f/2.8');
 
-    viewport.addEventListener('pointermove', function(e) {
-      if (!isDragging) return;
-      posX = e.clientX - startX;
-      posY = e.clientY - startY;
-      updateTransform();
-    });
+    // Φωτογραφία 2 (Ύψος: 700, Πλάτος: 1600)
+    addEvidence(parseInt("700"), parseInt("1600"), parseInt("6"), 'ΠΕΙΣΤΗΡΙΟ 02', 'ISO 100 | f/1.4');
 
-    viewport.addEventListener('pointerup', function(e) {
-      isDragging = false;
-      viewport.releasePointerCapture(e.pointerId);
-    });
+    // Σχεδίαση Σκοινιού ανάμεσα στα δύο σημεία (Ύψος1, Πλάτος1, Ύψος2, Πλάτος2)
+    var pointA = L.latLng(parseInt("900"), parseInt("800"));
+    var pointB = L.latLng(parseInt("700"), parseInt("1600"));
+    
+    L.polyline([pointA, pointB], {
+      color: '#cc0000', 
+      weight: parseInt("4"),
+      opacity: 0.9
+    }).addTo(map);
 
-    // 2. ΛΕΙΤΟΥΡΓΙΑ ΚΟΥΜΠΙΩΝ ZOOM (Σταθερή Σύνδεση Event)
-    btnIn.addEventListener('click', function() {
-      if (scale < 2.5) {
-        scale = scale + 0.2;
-        updateTransform();
-      }
-    });
-
-    btnOut.addEventListener('click', function() {
-      if (scale > 0.3) {
-        scale = scale - 0.2;
-        updateTransform();
-      }
-    });
-
-    // 3. ZOOM ΜΕ ΡΟΔΕΛΑ ΠΟΝΤΙΚΙΟΥ (Για PC)
-    viewport.addEventListener('wheel', function(e) {
-      e.preventDefault();
-      if (e.deltaY < 0) {
-        if (scale < 2.5) scale = scale + 0.1;
-      } else {
-        if (scale > 0.3) scale = scale - 0.1;
-      }
-      updateTransform();
-    }, { passive: false });
   </script>
-
 </body>
 </html>
