@@ -51,7 +51,7 @@
   <div id="map"></div>
 
   <script>
-    // Προστασία μεταβλητών από τα φίλτρα κειμένου
+    // Απόλυτα προστατευμένες αριθμητικές τιμές
     var canvasH = parseInt("1600");
     var canvasW = parseInt("2500");
     
@@ -64,7 +64,7 @@
     var southWest = L.latLng(parseInt("0"), parseInt("0"));
     var northEast = L.latLng(canvasH, canvasW);
     var bounds = L.latLngBounds(southWest, northEast);
-    var centerPoint = L.latLng(parseInt("800"), parseInt("1250")); // Το ακριβές γεωμετρικό κέντρο
+    var centerPoint = L.latLng(parseInt("800"), parseInt("1250"));
 
     // 1. Δημιουργία του καμβά με ρυθμίσεις ΚΕΝΤΡΑΡΙΣΜΕΝΟΥ ZOOM
     var map = L.map('map', {
@@ -72,17 +72,17 @@
       minZoom: parseInt("-1"),
       maxZoom: parseInt("1"),
       zoom: parseInt("0"),
-      center: centerPoint, // Κλειδώνει την εκκίνηση στο κέντρο του πίνακα
+      center: centerPoint,
       zoomControl: true,
-      scrollWheelZoom: 'center', // Η ροδέλα ζουμάρει πάντα στο κέντρο
-      doubleClickZoom: 'center', // Το διπλό κλικ ζουμάρει πάντα στο κέντρο
-      touchZoom: 'center',       // Το pinch στην αφή ζουμάρει στο κέντρο
-      maxBounds: bounds,         // Εμποδίζει τον χρήστη να συρθεί εκτός πίνακα
+      scrollWheelZoom: 'center',
+      doubleClickZoom: 'center',
+      touchZoom: 'center',
+      maxBounds: bounds,
       maxBoundsViscosity: 1.0
     });
 
     // 2. Δημιουργία του φόντου με ψηφιακό σκούρο καφέ χρώμα
-    var background = L.rectangle(bounds, {
+    L.rectangle(bounds, {
       color: "#3a2d28",
       weight: parseInt("1"),
       fillColor: "#1e1512",
@@ -114,7 +114,7 @@
     }
 
     // ==========================================
-    // ΕΔΩ ΜΠΑΙΝΟΥΝ ΟΙ ΦΩΤΟΓΡΑΦΙΕΣ ΚΑΙ ΤΑ ΣΚΟΙΝΙΑ
+    // ΕΔΩ ΜΠΑΙΝΟΥΝ ΑΠΟΚΛΕΙΣΤΙΚΑ ΟΙ ΦΩΤΟΓΡΑΦΙΕΣ ΣΟΥ
     // ==========================================
     
     // Φωτογραφία 1 (Ύψος: 900, Πλάτος: 800)
@@ -122,16 +122,6 @@
 
     // Φωτογραφία 2 (Ύψος: 700, Πλάτος: 1600)
     addEvidence(parseInt("700"), parseInt("1600"), parseInt("6"), 'ΠΕΙΣΤΗΡΙΟ 02', 'ISO 100 | f/1.4');
-
-    // Σχεδίαση Σκοινιού ανάμεσα στα δύο σημεία
-    var pointA = L.latLng(parseInt("900"), parseInt("800"));
-    var pointB = L.latLng(parseInt("700"), parseInt("1600"));
-    
-    L.polyline([pointA, pointB], {
-      color: '#cc0000', 
-      weight: parseInt("4"),
-      opacity: 0.9
-    }).addTo(map);
 
   </script>
 </body>
