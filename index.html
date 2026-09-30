@@ -2,52 +2,65 @@
 <html lang="el">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=3.0, user-scalable=yes" />
   <title>Investigation Portfolio Board</title>
+  
+  <!-- Εισαγωγή της βιβλιοθήκης Panzoom για το εφέ Google Maps (Zoom/Drag) -->
+  <script src="https://jsdelivr.net"></script>
+
   <style>
-    /* Βασικές ρυθμίσεις οθόνης */
     html, body {
       width: 100%;
       height: 100%;
       margin: 0;
       padding: 0;
       background-color: #121212;
-      overflow: auto; /* Ενεργοποιεί το ελεύθερο scroll παντού */
+      overflow: hidden; /* Κλειδώνει το κλασικό scroll για να δουλέψει το ελεύθερο drag */
     }
 
-    /* Ο μεγάλος πίνακας ερευνών (Καμβάς) */
-    #board {
-      width: 2500px;
-      height: 1600px;
-      background-image: url('https://wixstatic.com');
-      background-size: cover;
+    /* Το εξωτερικό κοντέινερ που πιάνει όλη την οθόνη */
+    #viewport {
+      width: 100%;
+      height: 100%;
       position: relative;
-      box-shadow: inset 0 0 100px rgba(0,0,0,0.8);
+    }
+
+    /* Ο μεγάλος πίνακας ερευνών (Καμβάς που γίνεται drag & zoom) */
+    #board {
+      width: 2400px;
+      height: 1600px;
+      background-image: url('https://googleusercontent.com'); /* Διορθωμένο Link Φόντου */
+      background-size: cover;
+      position: absolute;
+      top: 0;
+      left: 0;
+      box-shadow: inset 0 0 100px rgba(0,0,0,0.9);
+      transform-origin: 0 0;
     }
 
     /* Στυλ για τις φωτογραφίες Polaroid */
     .polaroid {
       background: white;
       padding: 10px 10px 25px 10px;
-      box-shadow: 5px 8px 20px rgba(0,0,0,0.6);
+      box-shadow: 5px 8px 20px rgba(0,0,0,0.7);
       border: 1px solid #ddd;
       position: absolute;
       transition: transform 0.2s ease;
       cursor: pointer;
       font-family: 'Courier New', monospace;
-      font-size: 11px;
+      font-size: 12px;
       color: #333;
       text-align: center;
     }
     .polaroid img {
       width: 180px;
-      height: auto;
+      height: 130px;
+      object-fit: cover;
       display: block;
       margin-bottom: 5px;
     }
     .polaroid:hover {
-      transform: scale(1.1) rotate(0deg) !important;
-      z-index: 9999 !important;
+      transform: scale(1.05) rotate(0deg) !important;
     }
 
     /* SVG επίπεδο για τη σχεδίαση των κόκκινων σκοινιών */
@@ -57,41 +70,58 @@
       left: 0;
       width: 100%;
       height: 100%;
-      pointer-events: none; /* Επιτρέπει τα κλικ στις φωτογραφίες από κάτω */
+      pointer-events: none;
     }
   </style>
 </head>
 <body>
 
-  <div id="board">
-    
-    <!-- Επίπεδο για τα κόκκινες κλωστές/σκοινιά -->
-    <svg>
-      <!-- Σκοινί από τη Φωτογραφία 1 στη Φωτογραφία 2 (Σύνδεση των κέντρων τους) -->
-      <line x1="490" y1="410" x2="1290" y2="610" style="stroke:#cc0000; stroke-width:3; stroke-opacity:0.85; stroke-linecap:round;" />
-    </svg>
+  <div id="viewport">
+    <div id="board">
+      
+      <!-- Επίπεδο για τα κόκκινες κλωστές/σκοινιά -->
+      <svg>
+        <!-- Σκοινί ανάμεσα στις δύο φωτογραφίες -->
+        <line x1="495" y1="415" x2="1295" y2="615" style="stroke:#cc0000; stroke-width:4; stroke-opacity:0.9; stroke-linecap:round;" />
+      </svg>
 
-    <!-- ΦΩΤΟΓΡΑΦΙΑ 1 -->
-    <!-- Position: Left=400px, Top=300px | Κλίση: -5 μοίρες -->
-    <div class="polaroid" style="left: 400px; top: 300px; transform: rotate(-5deg);" onclick="alert('ΥΠΟΘΕΣΗ #01\nΤοποθεσία: Αθήνα\nISO 400 | f/2.8');">
-      <img src="https://picsum.photos" alt="Evidence 1">
-      <span>ΠΕΙΣΤΗΡΙΟ 01</span>
+      <!-- ΦΩΤΟΓΡΑΦΙΑ 1 -->
+      <div class="polaroid" style="left: 400px; top: 300px; transform: rotate(-5deg);" onclick="alert('ΥΠΟΘΕΣΗ #01\nΤοποθεσία: Αθήνα\nISO 400 | f/2.8');">
+        <img src="https://googleusercontent.com" alt="Evidence 1">
+        <span>ΠΕΙΣΤΗΡΙΟ 01</span>
+      </div>
+
+      <!-- ΦΩΤΟΓΡΑΦΙΑ 2 -->
+      <div class="polaroid" style="left: 1200px; top: 500px; transform: rotate(6deg);" onclick="alert('ΥΠΟΘΕΣΗ #02\nConcept: Street Portrait\nISO 100 | f/1.4');">
+        <img src="https://googleusercontent.com" alt="Evidence 2">
+        <span>ΠΕΙΣΤΗΡΙΟ 02</span>
+      </div>
+
     </div>
-
-    <!-- ΦΩΤΟΓΡΑΦΙΑ 2 -->
-    <!-- Position: Left=1200px, Top=500px | Κλίση: 6 μοίρες -->
-    <div class="polaroid" style="left: 1200px; top: 500px; transform: rotate(6deg);" onclick="alert('ΥΠΟΘΕΣΗ #02\nConcept: Street Portrait\nISO 100 | f/1.4');">
-      <img src="https://picsum.photos" alt="Evidence 2">
-      <span>ΠΕΙΣΤΗΡΙΟ 02</span>
-    </div>
-
   </div>
 
   <script>
-    // Αυτόματος εστιασμός στο κέντρο του πίνακα κατά την εκκίνηση του site
-    window.onload = function() {
-      window.scrollTo(200, 300);
-    };
+    // Ενεργοποίηση του Google Maps εφέ (Pan & Zoom)
+    const boardElement = document.getElementById('board');
+    const viewportElement = document.getElementById('viewport');
+    
+    const panzoom = Panzoom(boardElement, {
+      maxScale: 3,
+      minScale: 0.3,
+      contain: 'outside',
+      startScale: 0.7 // Ξεκινάει ελαφρώς ζουμαρισμένο έξω για να φαίνεται ο πίνακας
+    });
+
+    // Ενεργοποίηση Zoom με τη ροδέλα του ποντικιού στον υπολογιστή
+    viewportElement.addEventListener('wheel', panzoom.zoomWithWheel);
+
+    // Ενεργοποίηση Drag (Σύρσιμο) με το ποντίκι ή την αφή
+    viewportElement.addEventListener('pointerdown', panzoom.startPan);
+
+    // Κεντράρισμα του πίνακα κατά την εκκίνηση
+    setTimeout(() => {
+      panzoom.pan(100, 50);
+    }, 100);
   </script>
 
 </body>
