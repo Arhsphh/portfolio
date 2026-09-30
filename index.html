@@ -18,7 +18,6 @@
       background-color: #1a1a1a;
     }
     
-    /* Στυλ για τις φωτογραφίες-Polaroid πάνω στον πίνακα */
     .polaroid-frame {
       background: white;
       padding: 8px 8px 22px 8px;
@@ -32,7 +31,6 @@
       color: #333;
     }
     
-    /* Γκρι κουτί αντί για εικόνα για να μην σπάει το link */
     .photo-placeholder {
       width: 150px;
       height: 110px;
@@ -51,77 +49,56 @@
   <div id="map"></div>
 
   <script>
-    // Απόλυτα προστατευμένες αριθμητικές τιμές
-    var canvasH = parseInt("1600");
-    var canvasW = parseInt("2500");
-    
-    var iconW = parseInt("170");
-    var iconH = parseInt("200");
-    var anchorW = parseInt("85");
-    var anchorH = parseInt("100");
+    // Ορισμός διαστάσεων καμβά
+    var canvasH = 1600;
+    var canvasW = 2500;
 
-    // Ορισμός ορίων και του απόλυτου κέντρου του πίνακα
-    var southWest = L.latLng(parseInt("0"), parseInt("0"));
-    var northEast = L.latLng(canvasH, canvasW);
-    var bounds = L.latLngBounds(southWest, northEast);
-    var centerPoint = L.latLng(parseInt("800"), parseInt("1250"));
-
-    // 1. Δημιουργία του καμβά με ρυθμίσεις ΚΕΝΤΡΑΡΙΣΜΕΝΟΥ ZOOM
+    // 1. Δημιουργία του καμβά με κεντραρισμένο Zoom
     var map = L.map('map', {
       crs: L.CRS.Simple,
-      minZoom: parseInt("-1"),
-      maxZoom: parseInt("1"),
-      zoom: parseInt("0"),
-      center: centerPoint,
+      minZoom: -1,
+      maxZoom: 1,
+      zoom: 0,
+      center: L.latLng(800, 1250), // Κεντράρισμα στη μέση του πίνακα
       zoomControl: true,
       scrollWheelZoom: 'center',
       doubleClickZoom: 'center',
-      touchZoom: 'center',
-      maxBounds: bounds,
-      maxBoundsViscosity: 1.0
+      touchZoom: 'center'
     });
 
-    // 2. Δημιουργία του φόντου με ψηφιακό σκούρο καφέ χρώμα
+    // Ορισμός ορίων του φόντου
+    var bounds = L.latLngBounds(L.latLng(0, 0), L.latLng(canvasH, canvasW));
+
+    // 2. Δημιουργία του φόντου (Σκούρος καμβάς)
     L.rectangle(bounds, {
       color: "#3a2d28",
-      weight: parseInt("1"),
+      weight: 1,
       fillColor: "#1e1512",
-      fillOpacity: parseInt("1")
+      fillOpacity: 1
     }).addTo(map);
 
-    // 3. ΣΥΝΑΡΤΗΣΗ ΓΙΑ ΝΑ ΒΑΖΕΙΣ ΦΩΤΟΓΡΑΦΙΕΣ (Πειστήρια)
-    function addEvidence(y, x, rotation, title, text) {
-      var sizePoint = L.point(iconW, iconH);
-      var anchorPoint = L.point(anchorW, anchorH);
+    // Περιορισμός της κίνησης μέσα στα όρια του πίνακα
+    map.setMaxBounds(bounds);
 
+    // 3. ΣΥΝΑΡΤΗΣΗ ΓΙΑ ΤΙΣ ΦΩΤΟΓΡΑΦΙΕΣ
+    function addEvidence(y, x, rotation, title, text) {
       var customIcon = L.divIcon({
         className: 'custom-pixel-node',
-        html: `<div class="polaroid-frame" style="transform: rotate(${rotation}deg);">
-                 <div class="photo-placeholder">ΦΩΤΟΓΡΑΦΙΑ</div>
-                 <span>${title}</span>
-               </div>`,
-        iconSize: sizePoint,
-        iconAnchor: anchorPoint
+        html: '<div class="polaroid-frame" style="transform: rotate(' + rotation + 'deg);"><div class="photo-placeholder">ΦΩΤΟΓΡΑΦΙΑ</div><span>' + title + '</span></div>',
+        iconSize: L.point(170, 200),
+        iconAnchor: L.point(85, 100)
       });
 
-      var markerPos = L.latLng(y, x);
-      L.marker(markerPos, {icon: customIcon}).addTo(map).bindPopup(`
-        <div style="width:200px; font-family:monospace;">
-          <h3>${title}</h3>
-          <p>${text}</p>
-        </div>
-      `);
+      L.marker(L.latLng(y, x), {icon: customIcon}).addTo(map).bindPopup(
+        '<div style="width:200px; font-family:monospace;"><h3>' + title + '</h3><p>' + text + '</p></div>'
+      );
     }
 
     // ==========================================
-    // ΕΔΩ ΜΠΑΙΝΟΥΝ ΑΠΟΚΛΕΙΣΤΙΚΑ ΟΙ ΦΩΤΟΓΡΑΦΙΕΣ ΣΟΥ
+    // ΤΟΠΟΘΕΤΗΣΗ ΦΩΤΟΓΡΑΦΙΩΝ
     // ==========================================
-    
-    // Φωτογραφία 1 (Ύψος: 900, Πλάτος: 800)
-    addEvidence(parseInt("900"), parseInt("800"), parseInt("-5"), 'ΠΕΙΣΤΗΡΙΟ 01', 'ISO 400 | f/2.8');
-
-    // Φωτογραφία 2 (Ύψος: 700, Πλάτος: 1600)
-    addEvidence(parseInt("700"), parseInt("1600"), parseInt("6"), 'ΠΕΙΣΤΗΡΙΟ 02', 'ISO 100 | f/1.4');
+    addEvidence(900, 800, -5, 'ΠΕΙΣΤΗΡΙΟ 01', 'ISO 400 | f/2.8');
+    addEvidence(700, 1600, 6, 'ΠΕΙΣΤΗΡΙΟ 02', 'ISO 100 | f/1.4');
 
   </script>
 </body>
